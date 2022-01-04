@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using KinAssessment.Entities;
+using KinAssessment.Entities.DiscountRules;
 using NUnit.Framework;
 
 namespace KinAssessment.Tests
@@ -12,10 +13,10 @@ namespace KinAssessment.Tests
         [TestCase("2,2,3", 120.59)]
         public void Run_WithExampleValues_ShouldReturnTotal(string productIds, decimal expectedValue)
         {
-            var discountRules = new List<DiscountRule>();
+            var discountRules = new List<IDiscountRule>();
             
-            discountRules.Add(new DiscountRule(75, 10));
-            discountRules.Add(new DiscountRule(1, 2, (decimal)22.99));
+            discountRules.Add(new TotalDiscount(75, 10));
+            discountRules.Add(new PriceModification(1, 2, (decimal)22.99));
             var result = Program.Run(productIds, discountRules);
             Assert.That(expectedValue, Is.EqualTo(result));
         }
@@ -25,10 +26,10 @@ namespace KinAssessment.Tests
         [TestCase("0,1,d", 24.95)]
         public void Run_WithInvalidValues_ShouldIgnoreInvalidOnes(string productIds, decimal expectedValue)
         {
-            var discountRules = new List<DiscountRule>();
+            var discountRules = new List<IDiscountRule>();
             
-            discountRules.Add(new DiscountRule(75, 10));
-            discountRules.Add(new DiscountRule(1, 2, (decimal)22.99));
+            discountRules.Add(new TotalDiscount(75, 10));
+            discountRules.Add(new PriceModification(1, 2, (decimal)22.99));
             var result = Program.Run(productIds, discountRules);
             Assert.That(expectedValue, Is.EqualTo(result));
         }

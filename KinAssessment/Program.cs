@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using KinAssessment.Entities;
+using KinAssessment.Entities.DiscountRules;
 using KinAssessment.Helpers;
 
 namespace KinAssessment
@@ -19,21 +20,21 @@ namespace KinAssessment
             
             var productsTyped = args[0].Split(',');
 
-            var discountRules = new List<DiscountRule>();
+            var discountRules = new List<IDiscountRule>();
             
-            discountRules.Add(new DiscountRule(75, 10));
-            discountRules.Add(new DiscountRule(1, 2, (decimal)22.99));
+            discountRules.Add(new TotalDiscount(75, 10));
+            discountRules.Add(new PriceModification(1, 2, (decimal)22.99));
 
             var total = Run(productsTyped, discountRules);
             
             Console.WriteLine($"The total is: {total}");
         }
 
-        public static decimal Run(string products, List<DiscountRule> discountRules)
+        public static decimal Run(string products, List<IDiscountRule> discountRules)
         {
             return Run(products.Split(','), discountRules);
         }
-        public static decimal Run(string[] products, List<DiscountRule> discountRules)
+        public static decimal Run(string[] products, List<IDiscountRule> discountRules)
         {
             var checkout = new Checkout(discountRules);
             checkout.Scan(GetSelectedProducts(products));

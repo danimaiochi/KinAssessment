@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using KinAssessment.Entities.DiscountRules;
 using KinAssessment.Helpers;
 
 namespace KinAssessment.Entities
@@ -8,9 +9,9 @@ namespace KinAssessment.Entities
     public class Checkout
     {
         public List<int> ProductIds { get; set; }
-        public List<DiscountRule> DiscountRules { get; set; }
+        public List<IDiscountRule> DiscountRules { get; set; }
 
-        public Checkout(List<DiscountRule> discountRules)
+        public Checkout(List<IDiscountRule> discountRules)
         {
             DiscountRules = discountRules;
         }
@@ -28,11 +29,11 @@ namespace KinAssessment.Entities
             var availableProducts = GetAllProducts();
             decimal total = 0;
             
-            foreach (var discountRule in DiscountRules.Where(x => x.DiscountRuleType == DiscountRuleType.Before))
+            foreach (var discountRule in DiscountRules)
             {
-                if (ProductIds.Count(x => x == discountRule.ProductId) >= discountRule.MinQuantity)
+                if (discountRule is PriceModification ds)
                 {
-                    availableProducts.First(x => x.Id == discountRule.ProductId).Price = discountRule.NewPrice;
+                    availableProducts = ds.GetUpdatedPrices(ProductIds, availableProducts);
                 }
             }
 
@@ -40,12 +41,12 @@ namespace KinAssessment.Entities
             {
                 total += availableProducts.FirstOrDefault(x => x.Id == productId)?.Price ?? 0;
             }
-
-            foreach (var discountRule in DiscountRules.Where(x => x.DiscountRuleType == DiscountRuleType.After))
+            
+            foreach (var discountRule in DiscountRules)
             {
-                if (total > discountRule.MinValue)
+                if (discountRule is TotalDiscount ds)
                 {
-                    total = -((discountRule.DiscountPercentage / 100) * total) + total;
+                    total = ds.GetDiscountedValue(total);
                 }
             }
 
